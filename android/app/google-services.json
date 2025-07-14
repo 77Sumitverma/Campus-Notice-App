@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "450794882629",
+    "project_id": "campusnoticeapp",
+    "storage_bucket": "campusnoticeapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:450794882629:android:36c90a9e6a6825552f052c",
+        "android_client_info": {
+          "package_name": "com.example.campus_notice_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "450794882629-s56mhfggkgetab5odhf33p6kf2ks2k6j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.campus_notice_app",
+            "certificate_hash": "c10ea5b480051ff1f33b343afcea1fe78c62f614"
+          }
+        },
+        {
+          "client_id": "450794882629-a9fl3cn0tlrksotkuqu89q2p92hhghdo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBB8sG_cEkR9rFJzphwUa0qgENZ7ivJxDo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "450794882629-a9fl3cn0tlrksotkuqu89q2p92hhghdo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
