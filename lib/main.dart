@@ -12,6 +12,10 @@ import 'package:campus_notice_app/Services/Supabase_client.dart';
 import 'package:campus_notice_app/Services/supabase_storage_service.dart';
 import 'package:campus_notice_app/Services/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'as supa;
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/material.dart';
+import 'package:campus_notice_app/Services/Notification Service/NotificationService.dart';
 
 
 
@@ -20,6 +24,8 @@ void main() async {
   await Firebase.initializeApp();
   await SupabaseConfig.initialize(); // ✅ ye sahi method call hai
   await GetStorage.init();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await NotificationService.init();
 
   Get.put(UpdateController());
 
@@ -30,7 +36,11 @@ void main() async {
     home: AuthChecker(),
   ));
 }
-
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  // Handle background message
+  print("BG Notification: ${message.notification?.title}");
+}
 
 // 👇 This widget decides where to go based on login state
 class AuthChecker extends StatelessWidget {

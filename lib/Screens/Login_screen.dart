@@ -1,9 +1,9 @@
+import 'package:campus_notice_app/Screens/SignUp_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_storage/get_storage.dart';
-
 import 'Navigation_bar/Home Screen/Home_page.dart';
 import 'ForgotPassword_screen.dart';
 import 'Navigation_bar/Add updates Screen/add_updates.dart';
@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       if (role == "admin") {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
       } else {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => AddUpdates()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -201,6 +201,24 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       onPressed: () => signInWithGoogle(),
                       icon: Icon(Icons.g_mobiledata, color: Colors.blue),
                       label: Text("Login with Google", style: TextStyle(color: Colors.blue)),
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("New to Campus Notice App? "),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => SignUp_Screen()),
+
+                            );
+                          },
+
+                          child: const Text("Sign Up", style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                      ],
                     ),
                   ],
                 ),

@@ -55,6 +55,14 @@ dependencies:
   get_storage: ^2.1.1
   url_launcher: ^6.2.5
   supabase_flutter: ^1.10.18
+  google_fonts: ^6.1.0
+  animations: ^2.0.11
+  photo_view: ^0.14.0
+  flutter_downloader: ^1.11.6
+  dio: ^5.4.0
+  permission_handler: ^11.3.1
+  firebase_messaging: 15.2.9
+  flutter_local_notifications: ^17.1.2
 
 
 
@@ -89,6 +97,10 @@ flutter:
   assets:
     - lib/assets/images/bell.png
     - lib/assets/images/avtar.png
+    - lib/assets/images/study_hall_college_logo.webp
+    - lib/assets/images/naval_sir.png
+    - lib/assets/images/neha_mam.png
+    - lib/assets/images/Himanshu_sir.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

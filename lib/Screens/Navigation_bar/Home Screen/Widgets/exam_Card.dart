@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:campus_notice_app/Screens/Navigation_bar/Home Screen/Widgets/notice_Card.dart';
 import 'package:campus_notice_app/Screens/ExamEditScreen.dart';
+import 'package:campus_notice_app/Services/util.dart';
 
 class ExamSection extends StatelessWidget {
   final PageController _pageController = PageController(viewportFraction: 0.85);
@@ -32,6 +33,14 @@ class ExamSection extends StatelessWidget {
               itemCount: exams.length,
               itemBuilder: (context, index) {
                 final data = exams[index];
+
+                final uploaderUID = data['uploaderUID'] ?? '';
+                final uploaderName = data['uploaderName'] ?? '';
+                final showOptions = canEditOrDelete(
+                  uploaderUID: uploaderUID,
+                  uploaderName: uploaderName,
+                );
+
                 return Transform.scale(
                   scale: 0.95,
                   child: ExamCard(
@@ -40,14 +49,14 @@ class ExamSection extends StatelessWidget {
                     date: data['date'] ?? '',
                     fileUrls: (data['fileUrls'] as List?)?.whereType<String>().toList() ?? [],
                     fileTypes: (data['fileTypes'] as List?)?.whereType<String>().toList() ?? [],
-                    createdAt:( data['createdAt']as Timestamp?)?.toDate(),
+                    createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
                     examId: data['id'],
+                    showOptions: showOptions,
                   ),
                 );
               },
             ),
           ),
-
           SmoothPageIndicator(
             controller: _pageController,
             count: exams.length,
@@ -64,6 +73,7 @@ class ExamSection extends StatelessWidget {
   }
 }
 
+
 class ExamCard extends StatelessWidget {
   final String title;
   final String description;
@@ -72,6 +82,7 @@ class ExamCard extends StatelessWidget {
   final List<String> fileTypes;
   final String examId;
   final DateTime? createdAt;
+  final bool showOptions;
 
   const ExamCard({
     super.key,
@@ -82,13 +93,14 @@ class ExamCard extends StatelessWidget {
     required this.fileTypes,
     required this.examId,
     required this.createdAt,
+    required this.showOptions,
   });
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: SizedBox(
-        height: 500,
+        height: 330,
         child: Card(
           elevation: 6,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -101,7 +113,7 @@ class ExamCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 30), // space for top icons
+                    const SizedBox(height: 30),
                     Center(
                       child: Text(
                         title,
@@ -109,10 +121,8 @@ class ExamCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Center(child: Text("On" " $date", style: const TextStyle(fontSize: 20, color: Colors.grey))),
+                    Center(child: Text("On $date", style: const TextStyle(fontSize: 20, color: Colors.grey))),
                     const SizedBox(height: 10),
-                    //const Text("📝 Description:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 4),
                     Text(description, style: const TextStyle(fontSize: 15, color: Colors.black87)),
                     const SizedBox(height: 12),
                     if (fileUrls.isNotEmpty)
@@ -155,36 +165,37 @@ class ExamCard extends StatelessWidget {
               ),
 
               // 🔴 Edit/Delete Top Right
-              Positioned(
-                top: 6,
-                right: 6,
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
-                      onPressed: () {
-                        Get.to(() => ExamEditScreen(
-                          examId: examId,
-                          title: title,
-                          description: description,
-                          date: date,
-                          fileUrls: fileUrls,
-                          fileTypes: fileTypes,
-                        ));
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                      onPressed: () async {
-                        await ExamUploadService.deleteExam(
-                          examId: examId,
-                          fileUrls: fileUrls,
-                        );
-                      },
-                    ),
-                  ],
+              if (showOptions)
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
+                        onPressed: () {
+                          Get.to(() => ExamEditScreen(
+                            examId: examId,
+                            title: title,
+                            description: description,
+                            date: date,
+                            fileUrls: fileUrls,
+                            fileTypes: fileTypes,
+                          ));
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                        onPressed: () async {
+                          await ExamUploadService.deleteExam(
+                            examId: examId,
+                            fileUrls: fileUrls,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ),

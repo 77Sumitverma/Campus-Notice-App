@@ -7,6 +7,8 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:campus_notice_app/Screens/Navigation_bar/Home Screen/Widgets/notice_Card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:campus_notice_app/Screens/EventEditScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:campus_notice_app/Services/util.dart';
 
 Widget UpcomingEventSection() {
   final updateController = Get.find<UpdateController>();
@@ -37,8 +39,10 @@ Widget UpcomingEventSection() {
                   fileUrls: event.fileUrls,
                   fileTypes: event.fileTypes,
                   createdAt: event.createdAt,
+                  uploaderUID: event.uploaderUID ?? '',
+                  uploaderName: event.uploaderName ?? '',
                   onEdit: () async {
-                   await Get.to(() => EventEditScreen(
+                    await Get.to(() => EventEditScreen(
                       eventId: event.eventID,
                       title: event.title ?? '',
                       description: event.description ?? '',
@@ -72,11 +76,6 @@ Widget UpcomingEventSection() {
   });
 }
 
-String formatTimestamp(Timestamp timestamp) {
-  final dt = timestamp.toDate();
-  return "${dt.day.toString().padLeft(2, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.year}";
-}
-
 Widget upcomingEventCard({
   required String title,
   required String date,
@@ -84,11 +83,19 @@ Widget upcomingEventCard({
   required List<String> fileUrls,
   required List<String> fileTypes,
   required Timestamp? createdAt,
+  required String uploaderUID,
+  required String uploaderName,
   required VoidCallback onEdit,
   required VoidCallback onDelete,
 }) {
+  final currentUser = FirebaseAuth.instance.currentUser;
+  final bool isUploader = uploaderUID == currentUser?.uid;
+  final bool isAdmin = uploaderName.toLowerCase() == 'admin';
+  final bool showOptions = isUploader || isAdmin;
+
   return SingleChildScrollView(
-    child: SizedBox(height: 250,
+    child: SizedBox(
+      height: 250,
       child: Card(
         elevation: 6,
         shape: RoundedRectangleBorder(
@@ -103,7 +110,6 @@ Widget upcomingEventCard({
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  /// 🗓️ Event Date & Upload Date (left top)
                   if (createdAt != null)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,10 +126,8 @@ Widget upcomingEventCard({
                       ],
                     ),
                   const SizedBox(height: 8),
-
-                  /// 📝 Title
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center, // 🔥 This centers the icon + text
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Icon(Icons.event, color: Colors.white),
                       const SizedBox(width: 10),
@@ -139,18 +143,13 @@ Widget upcomingEventCard({
                     ],
                   ),
                   const SizedBox(height: 10),
-
-                  /// 📄 Description
                   Text(
                     description,
                     style: const TextStyle(color: Colors.white),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-
                   const SizedBox(height: 10),
-
-                  /// 📁 Attached Files
                   if (fileUrls.isNotEmpty && fileUrls.length == fileTypes.length)
                     Wrap(
                       spacing: 10,
@@ -197,24 +196,23 @@ Widget upcomingEventCard({
                 ],
               ),
             ),
-
-            /// ✏️ Edit & Delete Buttons (right top)
-            Positioned(
-              right: 8,
-              top: 8,
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.white),
-                    onPressed: onEdit,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.redAccent),
-                    onPressed: onDelete,
-                  ),
-                ],
+            if (showOptions)
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.white),
+                      onPressed: onEdit,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.redAccent),
+                      onPressed: onDelete,
+                    ),
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),

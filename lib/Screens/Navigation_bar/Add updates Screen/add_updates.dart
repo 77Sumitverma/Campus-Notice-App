@@ -13,6 +13,7 @@ import 'package:campus_notice_app/Services/supabase_storage_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:campus_notice_app/controllers/Exam_model.dart';
 import 'package:campus_notice_app/Services/Exam_upload_service.dart';
+import 'package:campus_notice_app/Services/util.dart';
 
 class AddUpdates extends StatelessWidget {
   AddUpdates({super.key});
@@ -119,9 +120,9 @@ class AddUpdates extends StatelessWidget {
               buildSectionTitle("Add Upcoming Event"),
               buildEventCard(),
               const SizedBox(height: 30),
-              buildSectionTitle("Add Academic Achievement"),
-              buildAchievementCard(),
-              const SizedBox(height: 30),
+              // buildSectionTitle("Add Academic Achievement"),
+              // buildAchievementCard(),
+              //const SizedBox(height: 30),
               buildSectionTitle("Add Exam Details"),
               buildExamCard(),
             ],

@@ -1,4 +1,6 @@
+import 'package:campus_notice_app/Screens/AddNotesScreen.dart';
 import 'package:campus_notice_app/Screens/Login_screen.dart';
+import 'package:campus_notice_app/Screens/Navigation_bar/AboutCollegeScreen.dart';
 import 'package:campus_notice_app/Screens/Navigation_bar/Add updates Screen/add_updates.dart';
 import 'package:campus_notice_app/Screens/SignUp_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,6 +13,9 @@ import 'package:campus_notice_app/Screens/Navigation_bar/Home Screen/Widgets/upc
 import 'package:campus_notice_app/Screens/Navigation_bar/Home Screen/Widgets/academic_achievement_Card.dart';
 import 'package:campus_notice_app/Screens/Navigation_bar/Home Screen/Widgets/exam_Card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:campus_notice_app/Screens/NotesScreen.dart';
+import 'package:campus_notice_app/Screens/Navigation_bar/DownloadHistory.dart';
+import 'package:campus_notice_app/Screens/NotificationScreen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -22,46 +27,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-
   final PageController _pageController = PageController(viewportFraction: 0.85);
   final _advancedDrawerController = AdvancedDrawerController();
 
   String userName = "Loading...";
   String userEmail = "Email...";
   String userPhone = "Phone...";
-
+  String? userRole;
 
   int _currentIndex = 0;
-
-  final pageList = [
-    SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.only(left: 8.0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          SizedBox(height: 15),
-          Text("Latest updates", style: TextStyle(fontSize: 25, color: Colors.black, fontWeight: FontWeight.bold)),
-          SizedBox(height: 2),
-          NoticeCard(),
-          SizedBox(height: 5),
-          Text("Exams", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.black)),
-          SizedBox(height: 5),
-          ExamSection(),
-          Text("Upcoming Events", style: TextStyle(fontSize: 25, color: Colors.black, fontWeight: FontWeight.bold)),
-          SizedBox(height: 5),
-          UpcomingEventSection(),
-          // SizedBox(height: 5),
-          // Text("Academic Achievement", style: TextStyle(fontSize: 25, color: Colors.black, fontWeight: FontWeight.bold)),
-          // SizedBox(height: 10),
-          // AcademicAchievementSection()
-        ]),
-      ),
-    ),
-
-    Center(child: Text("Search", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
-    Center(child: AddUpdates()),
-    Center(child: Text("Downloads", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
-    Center(child: Text("About Campus", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
-  ];
 
   @override
   void initState() {
@@ -73,7 +47,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOutBack);
 
-    fetchUserName(); // 🔥 fetch name on login
+    fetchUserName();
+    fetchUserRole();
   }
 
   Future<void> fetchUserName() async {
@@ -90,6 +65,52 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     }
   }
 
+  Future<void> fetchUserRole() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (doc.exists) {
+        setState(() {
+          userRole = doc['role'] ?? "user";
+        });
+      }
+    }
+  }
+
+  List<Widget> getPageList() {
+    return [
+      SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 15),
+              Text("Latest updates", style: TextStyle(fontSize: 25, color: Colors.black, fontWeight: FontWeight.bold)),
+              SizedBox(height: 2),
+              NoticeCard(),
+              SizedBox(height: 5),
+              Text("Exams", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.black)),
+              SizedBox(height: 5),
+              ExamSection(),
+              Text("Upcoming Events", style: TextStyle(fontSize: 25, color: Colors.black, fontWeight: FontWeight.bold)),
+              SizedBox(height: 5),
+              UpcomingEventSection(),
+            ],
+          ),
+        ),
+      ),
+      NotesDisplayScreen(),
+      userRole == null
+          ? Center(child: CircularProgressIndicator())
+          : userRole == 'admin'
+          ? AddUpdates()
+          : AddNotesScreen(),
+      DownloadHistoryScreen(),
+      AboutCollegeScreen(),
+      Center(child: Text("About Campus", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
+    ];
+  }
 
   @override
   void dispose() {
@@ -99,6 +120,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    final pageList = getPageList();
+
     return AdvancedDrawer(
       controller: _advancedDrawerController,
       backdropColor: Colors.deepPurple,
@@ -133,34 +156,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
               ),
               const SizedBox(height: 30),
-
-              // 📧 Email Display
               ListTile(
                 leading: Icon(Icons.email, color: Colors.white),
-                title: Text(
-                  userEmail,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
+                title: Text(userEmail, style: const TextStyle(fontSize: 16, color: Colors.white)),
               ),
-
-              // 📞 Phone Display
               ListTile(
                 leading: Icon(Icons.phone, color: Colors.white),
-                title: Text(
-                  userPhone,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
+                title: Text(userPhone, style: const TextStyle(fontSize: 16, color: Colors.white)),
               ),
-
               const SizedBox(height: 20),
-
-              // About App
               drawerItem(Icons.info, 'About', () {
                 _advancedDrawerController.hideDrawer();
                 Get.defaultDialog(
@@ -172,14 +176,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   },
                 );
               }),
-
               const Spacer(),
-
-              // Logout
               drawerItem(Icons.logout, 'Logout', () async {
                 _advancedDrawerController.hideDrawer();
-
-                // ✅ Show Confirmation Dialog
                 Get.defaultDialog(
                   title: "Confirm Logout",
                   middleText: "Are you sure you want to logout?",
@@ -187,22 +186,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   textConfirm: "Yes",
                   confirmTextColor: Colors.white,
                   onConfirm: () async {
-                    Get.back(); // Close the dialog
+                    Get.back();
                     await FirebaseAuth.instance.signOut();
                     Get.snackbar("Logout", "Logged out successfully");
                     Get.offAll(() => LoginScreen());
                   },
                 );
               }),
-
-
               const SizedBox(height: 20),
             ],
           ),
         ),
       ),
-
-
       child: Scaffold(
         backgroundColor: Colors.blue.shade50,
         appBar: AppBar(
@@ -226,24 +221,26 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               ),
               const Text(
                 "Campus Notice",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
               ),
               IconButton(
-                onPressed: () {
-                  Get.snackbar("Notification", "No New Notifications");
-                },
                 icon: const Icon(Icons.notifications, color: Colors.white),
+                onPressed: () {
+                  showGeneralDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    barrierLabel: "NotificationDrawer",
+                    transitionDuration: const Duration(milliseconds: 400),
+                    pageBuilder: (_, __, ___) => const NotificationDrawer(),
+                  );
+                },
               ),
+
+
             ],
           ),
         ),
-
         body: pageList[_currentIndex],
-
         bottomNavigationBar: CurvedNavigationBar(
           backgroundColor: Colors.blue.shade50,
           color: Colors.blue.shade700,
@@ -258,7 +255,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           },
           items: const [
             Icon(Icons.home, color: Colors.white, size: 30),
-            Icon(Icons.search, color: Colors.white, size: 30),
+            Icon(Icons.edit_note_sharp, color: Colors.white, size: 30),
             Icon(Icons.add, color: Colors.white, size: 30),
             Icon(Icons.download, color: Colors.white, size: 30),
             Icon(Icons.apartment, color: Colors.white, size: 30),
@@ -280,4 +277,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       ),
     );
   }
+
+
 }
